@@ -30,7 +30,6 @@
         <div id='star-watch-fork-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
         <div id='follower-following-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
         <div id='star-chart' style='width: 100%;height:400px; float: left;'></div>
-
         <script type='text/javascript'>
             var display_star_chart = function (q, data) {
                 var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
@@ -52,7 +51,6 @@
                         axisLine: {onZero: false},
                         axisLabel: {
                             formatter: function (value, index) {
-                                // 格式化成月/日，只在第一个刻度显示年份
                                 var date = new Date(value);
                                 var texts = [date.getFullYear(), (date.getMonth() + 1), date.getDate()];
                                 return texts.join('-');
@@ -115,10 +113,7 @@
                         name: {
                             textStyle: {
                                 color: '#fff',
-                                //                            backgroundColor: '#999',
-                                borderRadius: 3,
-                                fontSize: 10
-                                //                            padding: [3, 5]
+                                borderRadius: 3
                             }
                         },
                         indicator: [
@@ -287,7 +282,7 @@
             var follower_following = get_follower_following_count(q, access_token);
 
             display_star_watch_fork_chart(q, stargazers.length, watches_count, forks_count);
-            display_follower_following_chart(q, 0, 0);
+            display_follower_following_chart(q, follower_following[0], follower_following[1]);
             display_star_chart(q, stargazers);
         </script>
     </section>
