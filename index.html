@@ -15,9 +15,9 @@
     <meta property='og:site_name' content='github-gazer'/>
     <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
     <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.min.js'></script>
+    <script type='text/javascript' src='index.js'></script>
     <script type='application/ld+json'>
 {'@type':'WebSite','headline':'Welcome to GitHub Pages','url':'https://pingao777.github.io/github-gazer/','name':'github-gazer','@context':'http://schema.org'}
-
 
     </script>
     <!-- End Jekyll SEO tag -->
@@ -26,153 +26,270 @@
 <a href='https://github.com/pingao777/github-gazer'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png' alt='Fork me on GitHub'></a>
 <div class='container'>
     <section id='main_content'>
-        <div id='star-chart' style='width: 100%;height:400px; margin-top: 20px;'></div>
-    </section>
-    <script type='text/javascript'>
-        var display_star_chart = function (repo, data) {
-            var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
+        <div id='star-watch-fork-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
+        <div id='follower-following-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
+        <div id='star-chart' style='width: 100%;height:400px; float: left;'></div>
 
-            var option = {
-                backgroundColor: 'rgba(0,0,0,0.0)',
+        <script type='text/javascript'>
+            var display_star_chart = function (q, data) {
+                var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
 
-                title: {
-                    text: 'Stargazers Trend  (' + repo + ')',
-                    left: '10%',  // 不要用right，否则副标题不显示
-                    top: '5%'  // 不要用bottom，否则副标题不显示
-                },
-                tooltip: {},
-                grid: {},
-                xAxis: {
-                    type: 'time',
-                    axisLine: {onZero: false},
-                    axisLabel: {
-                        formatter: function (value, index) {
-                            // 格式化成月/日，只在第一个刻度显示年份
-                            var date = new Date(value);
-                            var texts = [date.getFullYear(), (date.getMonth() + 1), date.getDate()];
-                            return texts.join('-');
-                        }
-                    }
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLine: {onZero: false}
-                },
-                dataZoom: [
-                    {
-                        type: 'slider',
-                        xAxisIndex: 0,
-                        filterMode: 'empty'
+                var option = {
+                    backgroundColor: 'rgba(0,0,0,0.0)',
+
+                    title: {
+                        text: 'Stargazers Trend',
+                        subtext: q,
+                        sublink: 'https://github.com/' + q,
+                        left: '10%',  // 不要用right，否则副标题不显示
+                        top: '1%'  // 不要用bottom，否则副标题不显示
                     },
-                    {
-                        type: 'inside',
-                        xAxisIndex: 0,
-                        filterMode: 'empty'
-                    }
-                ],
-                series: [
-                    {
-                        id: 'a',
-                        type: 'line',
-//                            smooth: true,
-                        symbolSize: 0,
-                        data: data,
-                        color: 'rgba(40,167,69,1.0)',
-                        tooltip: {
-                            formatter: function (params) {
-                                var date = new Date(params.value[0]);
-                                return ' （'
-                                    + date.getFullYear() + '-'
-                                    + (date.getMonth() + 1) + '-'
-                                    + date.getDate() + ' '
-                                    + date.getHours() + ':'
-                                    + date.getMinutes()
-                                    + '）<br/>'
-                                    + params.value[1];
+                    tooltip: {trigger: 'axis'},
+                    grid: {},
+                    xAxis: {
+                        type: 'time',
+                        axisLine: {onZero: false},
+                        axisLabel: {
+                            formatter: function (value, index) {
+                                // 格式化成月/日，只在第一个刻度显示年份
+                                var date = new Date(value);
+                                var texts = [date.getFullYear(), (date.getMonth() + 1), date.getDate()];
+                                return texts.join('-');
                             }
                         }
-                    }
-                ]
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLine: {onZero: false}
+                    },
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            xAxisIndex: 0,
+                            filterMode: 'empty'
+                        },
+                        {
+                            type: 'inside',
+                            xAxisIndex: 0,
+                            filterMode: 'empty'
+                        }
+                    ],
+                    series: [
+                        {
+                            id: 'a',
+                            type: 'line',
+//                            smooth: true,
+                            symbolSize: 0,
+                            data: data,
+                            color: 'rgba(40,167,69,1.0)',
+                            tooltip: {
+                                formatter: function (params) {
+                                    var date = new Date(params.value[0]);
+                                    return ' （'
+                                        + date.getFullYear() + '-'
+                                        + (date.getMonth() + 1) + '-'
+                                        + date.getDate() + ' '
+                                        + date.getHours() + ':'
+                                        + date.getMinutes()
+                                        + '）<br/>'
+                                        + params.value[1];
+                                }
+                            }
+                        }
+                    ]
+                };
+
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            };
+
+            var display_star_watch_fork_chart = function (q, stars_count, watches_count, forks_count) {
+                var myChart = echarts.init(document.getElementById('star-watch-fork-chart'), 'dark');
+                var option = {
+                    backgroundColor: 'rgba(0,0,0,0.0)',
+                    tooltip: {},
+                    radar: {
+                        shape: 'circle',
+                        name: {
+                            textStyle: {
+                                color: '#fff',
+                                //                            backgroundColor: '#999',
+                                borderRadius: 3,
+                                fontSize: 10
+                                //                            padding: [3, 5]
+                            }
+                        },
+                        indicator: [
+                            {name: 'Star', max: Math.max(stars_count, watches_count, forks_count)},
+                            {name: 'Watch', max: Math.max(stars_count, watches_count, forks_count)},
+                            {name: 'Fork', max: Math.max(stars_count, watches_count, forks_count)}
+                        ],
+                        splitLine: {
+                            lineStyle: {
+                                color: [
+                                    'rgba(45, 234, 148, 0.1)', 'rgba(45, 234, 148, 0.2)',
+                                    'rgba(45, 234, 148, 0.4)', 'rgba(45, 234, 148, 0.6)',
+                                    'rgba(45, 234, 148, 0.8)', 'rgba(45, 234, 148, 1)'
+                                ].reverse()
+                            }
+                        },
+                        splitArea: {
+                            show: false
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'rgba(45, 234, 148, 0.5)'
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Activity',
+                        type: 'radar',
+                        symbolSize: 0,
+                        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                        data: [
+                            {
+                                value: [stars_count, watches_count, forks_count],
+                                name: 'Activity'
+                            }
+                        ],
+                        color: 'rgba(40,167,69,1.0)'
+
+                    }]
+                };
+
+                myChart.setOption(option);
+            };
+
+            var display_follower_following_chart = function (q, follower_count, following_count) {
+                var myChart = echarts.init(document.getElementById('follower-following-chart'), 'dark');
+
+                var option = {
+                    backgroundColor: 'rgba(0,0,0,0.0)',
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b}: {c}'
+                    },
+                    color: ['#005cc5', '#28a745'],
+                    series: [
+                        {
+                            name: 'Relation',
+                            type: 'pie',
+                            radius: ['50%', '70%'],
+                            avoidLabelOverlap: false,
+                            label: {
+                                normal: {
+                                    show: true,
+                                    formatter: '{b}: {c}'
+                                }
+                            },
+                            labelLine: {
+                                normal: {
+                                    show: true
+                                }
+                            },
+                            data: [
+                                {value: follower_count, name: 'Follower'},
+                                {value: following_count, name: 'Following'}
+                            ]
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
             };
 
 
-            // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
-        };
+            var query = parse_query(window.location.search);
+            var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
+            var access_token = is_empty(query['access_token']) ? '' : query['access_token'];
 
-        var parse_query = function (query_string) {
+            var get_stargazers = function (q, access_token) {
 
-            if (is_empty(query_string)) {
-                return {};
-            }
-            var query = {};
-            query_string = query_string.charAt(0) === '?' ? query_string.substring(1) : query_string;
-            console.log(query_string);
-            var query_array = query_string.split('&');
-            for (var i in query_array) {
-                var kv = query_array[i].split('=');
-                console.log(kv);
-                query[kv[0]] = kv[1];
-            }
-            return query;
+                var stargazers = [];
+                var page = 1;
+                var page_size = 100;
+                var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
+                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                var result = query_github_api(url);
 
-        };
-
-        var is_empty = function (s) {
-            return s === null || s === undefined || s === '';
-        };
-
-
-        var query = parse_query(window.location.search);
-        var repo = is_empty(query['repo']) ? 'pingao777/markdown-preview-sync' : query['repo'];
-        var access_token = is_empty(query['access_token']) ? '' : query['access_token'];
-
-
-        var get_one_page_stargazers = function (repo, page) {
-            var stargazers = [];
-
-            $.ajax({
-                headers: {
-                    Accept: 'application/vnd.github.v3.star+json; charset=utf-8'
-                },
-                url: 'https://api.github.com/repos/' + repo + '/stargazers?per_page=100&page=' + page
-                + (is_empty(access_token) ? '' : '&access_token=' + access_token),
-                dataType: 'json',
-                type: 'get',
-                async: false,
-                success: function (data) {
-                    if (data.length !== 0) {
-                        stargazers = data.map(function (e, i) {
-                            return [e.starred_at.replace('T', ' ').replace('Z', ''), i + 1 + (page - 1) * 100]
-                        });
-                    }
+                while (result.length !== 0) {
+                    var stargazers_per_page = result.map(function (e, i) {
+                        return [e.starred_at.replace('T', ' ').replace('Z', ''), i + 1 + (page - 1) * 100]
+                    });
+                    stargazers = stargazers.concat(stargazers_per_page);
+                    page++;
+                    url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                    result = query_github_api(url);
                 }
-            });
 
-            return stargazers;
-        };
+                return stargazers;
+            };
 
-        var get_all_stargazers = function (repo) {
+            var get_forks_count = function (q, access_token) {
+                var forks_count = 0;
+                var user = q.split('/')[0];
+                var repo = q.split('/')[1];
+                var url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
+                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                var result = query_github_api(url);
 
-            var stargazers = [];
+                if (result.length !== 0) {
+                    forks_count = result['items'][0]['forks_count'];
+                }
 
-            var page = 1;
-            var stargazers_page = get_one_page_stargazers(repo, page);
+                return forks_count;
+            };
 
-            while (stargazers_page.length !== 0) {
-                stargazers = stargazers.concat(stargazers_page);
-                page++;
-                stargazers_page = get_one_page_stargazers(repo, page);
-            }
+            var get_watches_count = function (q, access_token) {
+                var watches_count = 0;
+                var page = 1;
+                var page_size = 100;
+                var url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
+                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                var result = query_github_api(url);
 
-            return stargazers;
-        };
+                while (result.length !== 0) {
+                    watches_count += result.length;
+                    page++;
+                    url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                    result = query_github_api(url);
+                }
+
+                return watches_count;
+            };
+
+            var get_follower_following_count = function (q, access_token) {
+                var follower_count = 0;
+                var following_count = 0;
+                var user = q.split('/')[0];
+                var url = 'https://api.github.com/users/' + user
+                    + (is_empty(access_token) ? '' : '?access_token=' + access_token);
+                var result = query_github_api(url);
+
+                if (result.length !== 0) {
+                    follower_count = result['followers'];
+                    following_count = result['following'];
+                }
+
+                return [follower_count, following_count];
+            };
 
 
-        //        var stargazers = [1, 2];
-        var stargazers = get_all_stargazers(repo);
-        display_star_chart(repo, stargazers);
-    </script>
+            //        var stargazers = [1, 2];
+            var stargazers = get_stargazers(q, access_token);
+            var watches_count = get_watches_count(q, access_token);
+            var forks_count = get_forks_count(q, access_token);
+            var follower_following = get_follower_following_count(q, access_token);
+
+            display_star_watch_fork_chart(q, stargazers.length, watches_count, forks_count);
+            display_follower_following_chart(q, follower_following[0], follower_following[1]);
+            display_star_chart(q, stargazers);
+        </script>
+    </section>
 </div>
 </body>
 </html>
