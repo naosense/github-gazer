@@ -27,8 +27,8 @@
 <a href='https://github.com/pingao777/github-gazer'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png' alt='Fork me on GitHub'></a>
 <div class='container'>
     <section id='main_content'>
-        <div id='star-watch-fork-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
-        <div id='follower-following-chart' style='width: 50%;height:200px; margin-top: 20px; float: left;'></div>
+        <div id='star-watch-fork-chart' style='width: 50%;height:200px; margin-top: 25px; float: left;'></div>
+        <div id='follower-following-chart' style='width: 50%;height:200px; margin-top: 25px; float: left;'></div>
         <div id='star-chart' style='width: 100%;height:400px; float: left;'></div>
         <script type='text/javascript'>
             var display_star_chart = function (q, data) {
@@ -110,11 +110,6 @@
                     tooltip: {},
                     radar: {
                         shape: 'circle',
-                        name: {
-                            textStyle: {
-                                color: '#fff'
-                            }
-                        },
                         indicator: [
                             {name: 'Star', max: Math.max(stars_count, watches_count, forks_count)},
                             {name: 'Watch', max: Math.max(stars_count, watches_count, forks_count)},
