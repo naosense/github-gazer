@@ -6,7 +6,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' href='https://pingao777.github.io/github-gazer/assets/css/style.css?v=83f9436b2e1b1a48c5227dc3037dbc5f1a9b5db1'>
     <!-- Begin Jekyll SEO tag v2.5.0 -->
-    <title>Be proud of you repository history | github-gazer</title>
+    <title>Let the world witness you repository history | github-gazer</title>
     <meta name='generator' content='Jekyll v3.7.3.1'/>
     <meta property='og:title' content='Be proud of you repository history | github-gazer'/>
     <meta property='og:locale' content='en_US'/>
@@ -27,9 +27,9 @@
 <a href='https://github.com/pingao777/github-gazer'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png' alt='Fork me on GitHub'></a>
 <div class='container'>
     <section id='main_content'>
-        <div id='star-watch-fork-chart' style='cursor: pointer; width: 50%;height:200px; margin-top: 20px; float: left;'></div>
-        <div id='follower-following-chart' style='cursor: pointer; width: 50%;height:200px; margin-top: 20px; float: left;'></div>
-        <div id='star-chart' style='cursor: pointer; width: 100%;height:400px; float: left;'></div>
+        <div id="star-chart" style="cursor: pointer; width: 100%;height:400px; margin-top: 20px; float: left;"></div>
+        <div id="star-watch-fork-chart" style="cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;"></div>
+        <div id="follower-following-chart" style="cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;"></div>
         <script type='text/javascript'>
             var display_star_chart = function (q, data) {
                 var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
@@ -101,6 +101,8 @@
 
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
+
+                return myChart;
             };
 
             var display_star_watch_fork_chart = function (q, stars_count, watches_count, forks_count) {
@@ -196,8 +198,9 @@
             var access_token = is_empty(query['access_token']) ? '' : query['access_token'];
 
             var get_stargazers = function (q, access_token) {
-
                 var stargazers = [];
+                var star_chart = display_star_chart(q, stargazers);
+
                 var page = 1;
                 var page_size = 100;
                 var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
@@ -209,6 +212,11 @@
                         return [e.starred_at.replace('T', ' ').replace('Z', ''), i + 1 + (page - 1) * 100]
                     });
                     stargazers = stargazers.concat(stargazers_per_page);
+                    star_chart.setOption({
+                        series: [{
+                            data: stargazers
+                        }]
+                    });
                     page++;
                     url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
                         + (is_empty(access_token) ? '' : '&access_token=' + access_token);
@@ -277,7 +285,7 @@
 
             display_star_watch_fork_chart(q, stargazers.length, watches_count, forks_count);
             display_follower_following_chart(q, follower_following[0], follower_following[1]);
-            display_star_chart(q, stargazers);
+            // display_star_chart(q, stargazers);
         </script>
     </section>
 </div>
