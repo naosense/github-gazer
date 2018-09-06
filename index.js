@@ -20,6 +20,18 @@ var is_empty = function (s) {
     return s === null || s === undefined || s === '';
 };
 
+
+$.ajaxSetup({
+    error: function (x, status, error) {
+        if (x.status === 403) {
+            alert("Sorry, exceeds github api rate limit, visit https://developer.github.com/v3/rate_limit/ for detail");
+        }
+        else {
+            alert("An error occurred: " + status + "nError: " + error);
+        }
+    }
+});
+
 var query_github_api = function (url) {
     var result = {};
     $.ajax({
