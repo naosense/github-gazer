@@ -56,7 +56,7 @@ var left_padding_zero = function (int) {
 $.ajaxSetup({
     error: function (x, status, error) {
         if (x.status === 403) {
-            alert('Sorry, exceeds github api rate limit, you could specify a access_token, visit https://github.com/pingao777/github-gazer for detail');
+            alert('Sorry, exceeds github api rate limit, you can specify a access_token, visit https://github.com/pingao777/github-gazer for more detail');
         }
         else {
             alert('Error occurred: ' + status + ', Error: ' + error);
