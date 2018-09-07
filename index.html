@@ -18,9 +18,6 @@
     <script type='text/javascript' src='index.js'></script>
     <script type='application/ld+json'>
 {'@type':'WebSite','headline':'Welcome to GitHub Pages','url':'https://pingao777.github.io/github-gazer/','name':'github-gazer','@context':'http://schema.org'}
-
-
-
     </script>
     <!-- End Jekyll SEO tag -->
 </head>
@@ -362,7 +359,6 @@
                 var now = new Date();
                 var today = datetime_to_date(now);
                 var one_year_ago = new Date(today.getTime() - 364 * mill_sec_one_day);
-                console.log(one_year_ago);
                 for (var i = 0; i < commits.length; i++) {
                     commits[i] = 0;
                 }
@@ -376,7 +372,6 @@
                     });
 
                     for (var j in commits_time) {
-                        console.log(commits_time[j]);
                         commits[Math.floor(date_diff_days(one_year_ago, new Date(commits_time[j])))] += 1;
                     }
 
