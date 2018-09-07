@@ -4,6 +4,6 @@ Just do it like this: `https://pingao777.github.io/github-gazer/?q=user/repo`, e
 
 ![github-gazer](http://wocanmei-hexo.nos-eastchina1.126.net/github-gazer/github-gazer-2.png)
 
-For repository with thousands of stars, you should set a access_token: `https://pingao777.github.io/github-gazer/?q=user/repo&access_token=...` cause of rate limit, visit [https://developer.github.com/v3/rate_limit/](https://developer.github.com/v3/rate_limit/) for more detail.
+For repository with thousands of stars, you could specify a access_token: `https://pingao777.github.io/github-gazer/?q=user/repo&access_token=...` cause of rate limit, visit [https://developer.github.com/v3/rate_limit/](https://developer.github.com/v3/rate_limit/) for more detail.
 
 Let the world witness you repository history!
