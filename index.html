@@ -20,6 +20,7 @@
 {'@type':'WebSite','headline':'Welcome to GitHub Pages','url':'https://pingao777.github.io/github-gazer/','name':'github-gazer','@context':'http://schema.org'}
 
 
+
     </script>
     <!-- End Jekyll SEO tag -->
 </head>
@@ -27,9 +28,10 @@
 <a href='https://github.com/pingao777/github-gazer'><img style='position: absolute; top: 0; right: 0; border: 0;' src='https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png' alt='Fork me on GitHub'></a>
 <div class='container'>
     <section id='main_content'>
-        <div id="star-chart" style="cursor: pointer; width: 100%;height:400px; margin-top: 20px; float: left;"></div>
-        <div id="star-watch-fork-chart" style="cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;"></div>
-        <div id="follower-following-chart" style="cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;"></div>
+        <div id='star-chart' style='cursor: pointer; width: 100%;height:400px; margin-top: 20px; float: left;'></div>
+        <div id='star-watch-fork-chart' style='cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;'></div>
+        <div id='follower-following-chart' style='cursor: pointer; width: 50%; height:210px; margin-top: 20px; float: left;'></div>
+        <div id='commit-chart' style='cursor: pointer; width: 90%;height:200px; margin-top: 20px; float: left;'></div>
         <script type='text/javascript'>
             var display_star_chart = function (q, data) {
                 var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
@@ -100,7 +102,7 @@
 
 
                 // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
+                myChart.setOption(option, true);
 
                 return myChart;
             };
@@ -192,6 +194,74 @@
                 myChart.setOption(option);
             };
 
+            var display_commit_chart = function (q, start, end, commmits) {
+                var myChart = echarts.init(document.getElementById('commit-chart'), 'dark');
+
+                var option = {
+                    backgroundColor: 'rgba(0,0,0,0.0)',
+                    title: {
+                        text: 'Repository Commits (' + datetime_to_date_str(start) + ' ~ ' + datetime_to_date_str(end) + ')',
+                        left: '10%',  // 不要用right，否则副标题不显示
+                        top: '1%'  // 不要用bottom，否则副标题不显示
+                    },
+                    tooltip: {
+                        position: 'top',
+                        formatter: function (params) {
+                            var date = new Date(params.value[0]);
+                            return date.getFullYear() + '-'
+                                + (date.getMonth() + 1) + '-'
+                                + date.getDate() + '<br/>'
+                                + params.value[1];
+                        }
+                    },
+                    visualMap: {
+                        show: false,
+                        min: 0,
+                        max: 10,
+                        calculable: true,
+                        orient: 'horizontal',
+                        left: 'center',
+                        top: 'top',
+                        inRange: {
+                            color: ['#4A4A4A', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
+                        }
+                    },
+
+                    calendar: [
+                        {
+                            range: [start, end],
+                            cellSize: [15, 15],
+                            splitLine: {
+                                show: false
+                            },
+                            itemStyle: {
+                                borderWidth: 2,
+                                borderColor: '#000'
+                            },
+                            dayLabel: {
+                                color: '#eeeeee'
+                            },
+                            monthLabel: {
+                                color: '#eeeeee'
+                            },
+                            yearLabel: {
+                                show: false
+                            }
+
+                        }],
+
+                    series: [{
+                        type: 'heatmap',
+                        coordinateSystem: 'calendar',
+                        calendarIndex: 0,
+                        data: commmits
+                    }]
+
+                };
+
+                myChart.setOption(option);
+            };
+
 
             var query = parse_query(window.location.search);
             var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
@@ -209,7 +279,7 @@
 
                 while (result.length !== 0) {
                     var stargazers_per_page = result.map(function (e, i) {
-                        return [e.starred_at.replace('T', ' ').replace('Z', ''), i + 1 + (page - 1) * 100]
+                        return [e.starred_at, i + 1 + (page - 1) * 100]
                     });
                     stargazers = stargazers.concat(stargazers_per_page);
                     star_chart.setOption({
@@ -226,41 +296,9 @@
                 return stargazers;
             };
 
-            var get_forks_count = function (q, access_token) {
-                var forks_count = 0;
-                var user = q.split('/')[0];
-                var repo = q.split('/')[1];
-                var url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
-                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
-                var result = query_github_api(url);
 
-                if (result.length !== 0) {
-                    forks_count = result['items'][0]['forks_count'];
-                }
 
-                return forks_count;
-            };
-
-            var get_watches_count = function (q, access_token) {
-                var watches_count = 0;
-                var page = 1;
-                var page_size = 100;
-                var url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
-                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
-                var result = query_github_api(url);
-
-                while (result.length !== 0) {
-                    watches_count += result.length;
-                    page++;
-                    url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
-                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
-                    result = query_github_api(url);
-                }
-
-                return watches_count;
-            };
-
-            var get_follower_following_count = function (q, access_token) {
+            var render_follower_following_chart = function (q, access_token) {
                 var follower_count = 0;
                 var following_count = 0;
                 var user = q.split('/')[0];
@@ -273,19 +311,88 @@
                     following_count = result['following'];
                 }
 
-                return [follower_count, following_count];
+                display_follower_following_chart(q, follower_count, following_count);
+            };
+
+            var render_star_watch_fork_chart = function (q, access_token) {
+                var get_forks_count = function (q, access_token) {
+                    var forks_count = 0;
+                    var user = q.split('/')[0];
+                    var repo = q.split('/')[1];
+                    var url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                    var result = query_github_api(url);
+
+                    if (result.length !== 0) {
+                        forks_count = result['items'][0]['forks_count'];
+                    }
+
+                    return forks_count;
+                };
+
+                var get_watches_count = function (q, access_token) {
+                    var watches_count = 0;
+                    var page = 1;
+                    var page_size = 100;
+                    var url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                    var result = query_github_api(url);
+
+                    while (result.length !== 0) {
+                        watches_count += result.length;
+                        page++;
+                        url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
+                            + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                        result = query_github_api(url);
+                    }
+
+                    return watches_count;
+                };
+
+                var watches_count = get_watches_count(q, access_token);
+                var forks_count = get_forks_count(q, access_token);
+
+                display_star_watch_fork_chart(q, stargazers.length, watches_count, forks_count);
+
+            };
+
+            var render_commit_chart = function (q, access_token) {
+                var mill_sec_one_day = 24 * 3600 * 1000;
+                var commits = new Array(365);
+                var now = new Date();
+                var today = datetime_to_date(now);
+                var one_year_ago = new Date(today.getTime() - 364 * mill_sec_one_day);
+                console.log(one_year_ago);
+                for (var i = 0; i < commits.length; i++) {
+                    commits[i] = 0;
+                }
+                var url = 'https://api.github.com/repos/' + q + '/commits?since=' + one_year_ago.toISOString()
+                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+                var result = query_github_api(url);
+
+                if (result.length !== 0) {
+                    var commits_time = result.map(function (e) {
+                        return e.commit.committer.date;
+                    });
+
+                    for (var j in commits_time) {
+                        console.log(commits_time[j]);
+                        commits[Math.floor(date_diff_days(one_year_ago, new Date(commits_time[j])))] += 1;
+                    }
+
+                    commits = commits.map(function (e, i) {
+                        return [new Date(one_year_ago.getTime() + i * mill_sec_one_day).toISOString(), commits[i]];
+                    });
+                }
+                display_commit_chart(q, one_year_ago, today, commits);
             };
 
 
             //        var stargazers = [1, 2];
             var stargazers = get_stargazers(q, access_token);
-            var watches_count = get_watches_count(q, access_token);
-            var forks_count = get_forks_count(q, access_token);
-            var follower_following = get_follower_following_count(q, access_token);
-
-            display_star_watch_fork_chart(q, stargazers.length, watches_count, forks_count);
-            display_follower_following_chart(q, follower_following[0], follower_following[1]);
-            // display_star_chart(q, stargazers);
+            render_star_watch_fork_chart(q, access_token);
+            render_follower_following_chart(q, access_token);
+            render_commit_chart(q, access_token)
         </script>
     </section>
 </div>
