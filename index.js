@@ -328,12 +328,13 @@ $(document).ready(function(){
                         stargazers = stargazers.concat(stargazers_per_page);
 
                         var progress = stargazers.length / stargazers_count * 100;
+                        $('#progress-bar').css('width', progress + '%');
                         if (progress >= 100) {
+                            $('#progress-bar').css('background-color', '#000');
                             stargazers.sort(function (s1, s2) {
                                 return s1[1] - s2[1];
                             });
                             display_star_chart(q, stargazers);
-
                         }
                     });
                 })(page);
