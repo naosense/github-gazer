@@ -313,8 +313,9 @@ $(document).ready(function(){
             var stargazers = [];
             var page = 1;
             var page_size = 100;
-            var page_count = Math.ceil(stargazers_count / page_size);
-
+            // github最多返回40000条数据
+            var return_stargazers_count = Math.min(stargazers_count, 40000);
+            var page_count = Math.ceil(return_stargazers_count / page_size);
 
             while (page <= page_count) {
                 var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
@@ -328,7 +329,7 @@ $(document).ready(function(){
 
                         stargazers = stargazers.concat(stargazers_per_page);
 
-                        var progress = stargazers.length / stargazers_count * 100;
+                        var progress = stargazers.length / return_stargazers_count * 100;
                         $('#progress-bar').css('width', progress + '%');
                         if (progress >= 100) {
                             $('#progress-bar').css('background-color', '#000');
