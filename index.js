@@ -70,7 +70,7 @@ $(document).ready(function(){
         });
     };
 
-    var display_star_chart = function (q, data) {
+    var display_star_chart = function (q, description, data) {
         var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
 
         var option = {
@@ -78,7 +78,7 @@ $(document).ready(function(){
 
             title: {
                 text: 'Stargazers Trend',
-                subtext: q,
+                subtext: q + (is_empty(description) ? '' : ': ' + description),
                 sublink: 'https://github.com/' + q,
                 left: '10%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
@@ -309,6 +309,7 @@ $(document).ready(function(){
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['items'][0]['stargazers_count'];
+            var description = search_data['items'][0]['description'];
             var stargazers = [];
             var page = 1;
             var page_size = 100;
@@ -334,7 +335,7 @@ $(document).ready(function(){
                             stargazers.sort(function (s1, s2) {
                                 return s1[1] - s2[1];
                             });
-                            display_star_chart(q, stargazers);
+                            display_star_chart(q, description, stargazers);
                         }
                     });
                 })(page);
