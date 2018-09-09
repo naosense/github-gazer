@@ -444,29 +444,25 @@ $(document).ready(function(){
         var mill_sec_one_day = 24 * 3600 * 1000;
         var now = new Date();
         var today = datetime_to_date(now);
-        var one_year_ago = new Date(today.getTime() - 364 * mill_sec_one_day);
 
-        var url = 'https://api.github.com/repos/' + q + '/commits?since=' + one_year_ago.toISOString()
-            + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+        var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity'
+            + (is_empty(access_token) ? '' : '?access_token=' + access_token);
 
         invoke_github_api(url, function (commit_data) {
-            var commits = new Array(365);
+            // 第一次请求返回空，所以在这里预先请求一次
+        });
+
+        invoke_github_api(url, function (commit_data) {
+            var week = now.getDay();
+            var days = 51 * 7 + week + 1;
+            var one_year_ago = new Date(today.getTime() - (days - 1) * mill_sec_one_day);
+
+            var commits = new Array(days);
 
             for (var i = 0; i < commits.length; i++) {
-                commits[i] = 0;
+
+                commits[i] = [new Date(one_year_ago.getTime() + i * mill_sec_one_day).toISOString(), commit_data[Math.floor(i / 7)]['days'][i % 7]];
             }
-
-            var commits_time = commit_data.map(function (e) {
-                return e.commit.committer.date;
-            });
-
-            for (var j in commits_time) {
-                commits[Math.floor(date_diff_days(one_year_ago, new Date(commits_time[j])))] += 1;
-            }
-
-            commits = commits.map(function (e, i) {
-                return [new Date(one_year_ago.getTime() + i * mill_sec_one_day).toISOString(), commits[i]];
-            });
 
             display_commit_chart(q, one_year_ago, today, commits);
         });
