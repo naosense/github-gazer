@@ -116,6 +116,20 @@ $(document).ready(function(){
                 type: 'value',
                 axisLine: {onZero: false}
             },
+            visualMap: {
+                show: false,
+                dimension: 1,
+                pieces: [{
+                    lte: 0,
+                    color: 'rgba(40,167,69,1.0)'
+                }, {
+                    lte: 40000,
+                    color: 'rgba(40,167,69,1.0)'
+                }, {
+                    gt: 40000,
+                    color: 'rgba(40,167,69,0.3)'
+                }]
+            },
             dataZoom: [
                 {
                     type: 'slider',
@@ -132,9 +146,15 @@ $(document).ready(function(){
                 {
                     id: 'a',
                     type: 'line',
-//                            smooth: true,
+                    // smooth: 1,
                     symbolSize: 0,
                     data: data,
+                    markPoint: {
+                        silent: true,
+                        data: [
+                            {type: 'max', name: 'Stargazers Now'},
+                        ]
+                    },
                     color: 'rgba(40,167,69,1.0)',
                     tooltip: {
                         formatter: function (params) {
@@ -335,32 +355,35 @@ $(document).ready(function(){
 
             if (page_count === 0) {
                 display_star_chart(q, description, stargazers);
-            }
+            } else {
+                while (page <= page_count) {
+                    var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
 
-            while (page <= page_count) {
-                var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
-                    + (is_empty(access_token) ? '' : '&access_token=' + access_token);
-
-                (function (page) {
-                    invoke_github_api(url, function (stargazers_data) {
-                        var stargazers_per_page = stargazers_data.map(function (e, i) {
-                            return [e.starred_at, i + 1 + (page - 1) * 100]
-                        });
-
-                        stargazers = stargazers.concat(stargazers_per_page);
-
-                        var progress = stargazers.length / return_stargazers_count * 100;
-                        $('#progress-bar').css('width', progress + '%');
-                        if (progress >= 100) {
-                            $('#progress-bar').css('background-color', '#000');
-                            stargazers.sort(function (s1, s2) {
-                                return s1[1] - s2[1];
+                    (function (page) {
+                        invoke_github_api(url, function (stargazers_data) {
+                            var stargazers_per_page = stargazers_data.map(function (e, i) {
+                                return [e.starred_at, i + 1 + (page - 1) * 100]
                             });
-                            display_star_chart(q, description, stargazers);
-                        }
-                    });
-                })(page);
-                page++;
+
+                            stargazers = stargazers.concat(stargazers_per_page);
+
+                            var progress = stargazers.length / return_stargazers_count * 100;
+                            $('#progress-bar').css('width', progress + '%');
+                            if (progress >= 100) {
+                                $('#progress-bar').css('background-color', '#000');
+                                stargazers.sort(function (s1, s2) {
+                                    return s1[1] - s2[1];
+                                });
+                                if (stargazers_count > 40000) {
+                                    stargazers.push([new Date().toISOString(), stargazers_count])
+                                }
+                                display_star_chart(q, description, stargazers);
+                            }
+                        });
+                    })(page);
+                    page++;
+                }
             }
         });
     };
