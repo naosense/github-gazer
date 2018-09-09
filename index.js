@@ -43,6 +43,22 @@ $(document).ready(function(){
         return int < 10 ? '0' + int : int;
     };
 
+    var parse_last_page = function (link_header) {
+        if (is_empty(link_header)) {
+            return 1;
+        }
+
+        var lks = link_header.split(',');
+
+        for (var i in lks) {
+            var url_rel = lks[i].split(';');
+            if (url_rel[1].indexOf('last') > -1) {
+                return parseInt(parse_query(url_rel[0].substring(url_rel[0].indexOf('?'), url_rel[0].length - 1))['page']);
+            }
+        }
+
+        return 1;
+    };
 
     $.ajaxSetup({
         error: function (x, status, error) {
@@ -64,8 +80,8 @@ $(document).ready(function(){
             dataType: 'json',
             type: 'get',
             async: true,
-            success: function (data) {
-                callback(data);
+            success: function (data, status, xhr) {
+                callback(data, xhr);
             }
         });
     };
@@ -317,6 +333,10 @@ $(document).ready(function(){
             var return_stargazers_count = Math.min(stargazers_count, 40000);
             var page_count = Math.ceil(return_stargazers_count / page_size);
 
+            if (page_count === 0) {
+                display_star_chart(q, description, stargazers);
+            }
+
             while (page <= page_count) {
                 var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
                     + (is_empty(access_token) ? '' : '&access_token=' + access_token);
@@ -374,20 +394,24 @@ $(document).ready(function(){
             var watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
                 + (is_empty(access_token) ? '' : '&access_token=' + access_token);
 
-            var callback = function (watch_data) {
-                    if (watch_data.length !== 0) {
+            invoke_github_api(watch_url, function (watch_data, xhr) {
+
+                    var last_page = parse_last_page(xhr.getResponseHeader('Link'));
+
+                    if (last_page === 1) {
                         watches_count += watch_data.length;
-                        page++;
-                        watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
+                        display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
+
+                    } else {
+                        watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + last_page
                             + (is_empty(access_token) ? '' : '&access_token=' + access_token);
 
-                        invoke_github_api(watch_url, callback);
-                    } else {
-                        display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
+                        invoke_github_api(watch_url, function (watch_data) {
+                            watches_count = (last_page - 1) * page_size + watch_data.length;
+                            display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
+                        });
                     }
-            };
-
-            invoke_github_api(watch_url, callback);
+            });
 
         });
 
