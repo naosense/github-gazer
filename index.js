@@ -269,7 +269,7 @@ $(document).ready(function () {
             backgroundColor: 'rgba(0,0,0,0.0)',
             title: {
                 text: 'Repository Commits (' + datetime_to_date_str(start) + ' ~ ' + datetime_to_date_str(end) + ')',
-                left: '10%',  // 不要用right，否则副标题不显示
+                left: '8%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
             },
             tooltip: {
@@ -329,7 +329,7 @@ $(document).ready(function () {
         myChart.setOption(option);
     };
 
-    const github_returned_max_stars = 40000;
+    const github_returned_max_stars = 39999;
 
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
