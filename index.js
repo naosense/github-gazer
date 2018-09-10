@@ -1,4 +1,4 @@
-$(document).ready(function(){
+$(document).ready(function () {
     var parse_query = function (query_string) {
 
         if (is_empty(query_string)) {
@@ -100,16 +100,22 @@ $(document).ready(function(){
                 left: '10%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
             },
-            tooltip: {trigger: 'axis'},
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    return params[0]['marker'] + ' '
+                        + params[0]['value'][1] + ' stars on '
+                        + echarts.format.formatTime('yyyy-MM-dd', params[0]['axisValue']);
+                }
+            },
             grid: {},
             xAxis: {
                 type: 'time',
                 axisLine: {onZero: false},
                 axisLabel: {
+                    interval: 0,
                     formatter: function (value, index) {
-                        var date = new Date(value);
-                        var texts = [date.getFullYear(), (date.getMonth() + 1), date.getDate()];
-                        return texts.join('-');
+                        return echarts.format.formatTime('yyyy-MM-dd', value);
                     }
                 }
             },
@@ -135,7 +141,10 @@ $(document).ready(function(){
                 {
                     type: 'slider',
                     xAxisIndex: 0,
-                    filterMode: 'empty'
+                    filterMode: 'empty',
+                    labelFormatter: function (value) {
+                        return echarts.format.formatTime('yyyy-MM-dd', value);
+                    }
                 },
                 {
                     type: 'inside',
@@ -153,23 +162,10 @@ $(document).ready(function(){
                     markPoint: {
                         silent: true,
                         data: [
-                            {type: 'max', name: 'Stargazers Now'},
+                            {type: 'max', name: 'Stargazers Now'}
                         ]
                     },
-                    color: 'rgba(40,167,69,1.0)',
-                    tooltip: {
-                        formatter: function (params) {
-                            var date = new Date(params.value[0]);
-                            return ' （'
-                                + date.getFullYear() + '-'
-                                + (date.getMonth() + 1) + '-'
-                                + date.getDate() + ' '
-                                + date.getHours() + ':'
-                                + date.getMinutes()
-                                + '）<br/>'
-                                + params.value[1];
-                        }
-                    }
+                    color: 'rgba(40,167,69,1.0)'
                 }
             ]
         };
@@ -279,11 +275,10 @@ $(document).ready(function(){
             tooltip: {
                 position: 'top',
                 formatter: function (params) {
-                    var date = new Date(params.value[0]);
-                    return date.getFullYear() + '-'
-                        + (date.getMonth() + 1) + '-'
-                        + date.getDate() + '<br/>'
-                        + params.value[1];
+                    return params['marker'] + ' '
+                        + params['value'][1] + ' commits on '
+                        + echarts.format.formatTime('yyyy-MM-dd', params['value'][0]);
+
                 }
             },
             visualMap: {
@@ -422,21 +417,21 @@ $(document).ready(function(){
 
             invoke_github_api(watch_url, function (watch_data, xhr) {
 
-                    var last_page = parse_last_page(xhr.getResponseHeader('Link'));
+                var last_page = parse_last_page(xhr.getResponseHeader('Link'));
 
-                    if (last_page === 1) {
-                        watches_count += watch_data.length;
+                if (last_page === 1) {
+                    watches_count += watch_data.length;
+                    display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
+
+                } else {
+                    watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + last_page
+                        + (is_empty(access_token) ? '' : '&access_token=' + access_token);
+
+                    invoke_github_api(watch_url, function (watch_data) {
+                        watches_count = (last_page - 1) * page_size + watch_data.length;
                         display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
-
-                    } else {
-                        watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + last_page
-                            + (is_empty(access_token) ? '' : '&access_token=' + access_token);
-
-                        invoke_github_api(watch_url, function (watch_data) {
-                            watches_count = (last_page - 1) * page_size + watch_data.length;
-                            display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
-                        });
-                    }
+                    });
+                }
             });
 
         });
