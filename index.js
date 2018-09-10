@@ -61,13 +61,13 @@ $(document).ready(function(){
     };
 
     $.ajaxSetup({
-        error: function (x, status, error) {
-            if (x.status === 403) {
+        error: function (xhr, status, error) {
+            if (xhr.status === 403) {
                 alert('Sorry, exceeds github api rate limit, you can specify a access_token, visit https://github.com/pingao777/github-gazer for more detail');
-            }
-            else {
+            } else {
                 alert('Error occurred: ' + status + ', Error: ' + error);
             }
+            console.error(xhr.responseText);
         }
     });
 
@@ -463,19 +463,16 @@ $(document).ready(function(){
             var commits = new Array(days);
 
             for (var i = 0; i < commits.length; i++) {
-
                 commits[i] = [new Date(one_year_ago.getTime() + i * mill_sec_one_day).toISOString(), commit_data[Math.floor(i / 7)]['days'][i % 7]];
             }
 
             display_commit_chart(q, one_year_ago, today, commits);
         });
-
-
     };
 
     //        var stargazers = [1, 2];
-        render_stargazers(q, access_token);
-        render_star_watch_fork_chart(q, access_token);
-        render_follower_following_chart(q, access_token);
-        render_commit_chart(q, access_token)
+    render_stargazers(q, access_token);
+    render_star_watch_fork_chart(q, access_token);
+    render_follower_following_chart(q, access_token);
+    render_commit_chart(q, access_token)
 });
