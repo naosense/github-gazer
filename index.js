@@ -86,6 +86,7 @@ $(document).ready(function(){
         });
     };
 
+
     var display_star_chart = function (q, description, data) {
         var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
 
@@ -123,10 +124,10 @@ $(document).ready(function(){
                     lte: 0,
                     color: 'rgba(40,167,69,1.0)'
                 }, {
-                    lte: 40000,
+                    lte: github_returned_max_stars,
                     color: 'rgba(40,167,69,1.0)'
                 }, {
-                    gt: 40000,
+                    gt: github_returned_max_stars,
                     color: 'rgba(40,167,69,0.3)'
                 }]
             },
@@ -333,6 +334,8 @@ $(document).ready(function(){
         myChart.setOption(option);
     };
 
+    const github_returned_max_stars = 40000;
+
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
     var access_token = is_empty(query['access_token']) ? '' : query['access_token'];
@@ -350,7 +353,7 @@ $(document).ready(function(){
             var page = 1;
             var page_size = 100;
             // github最多返回40000条数据
-            var return_stargazers_count = Math.min(stargazers_count, 40000);
+            var return_stargazers_count = Math.min(stargazers_count, github_returned_max_stars);
             var page_count = Math.ceil(return_stargazers_count / page_size);
 
             if (page_count === 0) {
@@ -375,7 +378,7 @@ $(document).ready(function(){
                                 stargazers.sort(function (s1, s2) {
                                     return s1[1] - s2[1];
                                 });
-                                if (stargazers_count > 40000) {
+                                if (stargazers_count > github_returned_max_stars) {
                                     stargazers.push([new Date().toISOString(), stargazers_count])
                                 }
                                 display_star_chart(q, description, stargazers);
