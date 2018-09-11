@@ -97,7 +97,7 @@ $(document).ready(function () {
                 text: 'Stargazers Trend',
                 subtext: q + (is_empty(description) ? '' : ': ' + description),
                 sublink: 'https://github.com/' + q,
-                left: '10%',  // 不要用right，否则副标题不显示
+                left: '11%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
             },
             tooltip: {
@@ -263,14 +263,14 @@ $(document).ready(function () {
         myChart.setOption(option);
     };
 
-    var display_commit_chart = function (q, start, end, commmits) {
+    var display_commit_chart = function (q, start, end, commits) {
         var myChart = echarts.init(document.getElementById('commit-chart'), 'dark');
 
         var option = {
             backgroundColor: 'rgba(0,0,0,0.0)',
             title: {
-                text: 'Repository Commits (' + datetime_to_date_str(start) + ' ~ ' + datetime_to_date_str(end) + ')',
-                left: '10%',  // 不要用right，否则副标题不显示
+                subtext: 'Repository Commit Activity: ' + get_total_commit_count(commits) + ' commits during ' + datetime_to_date_str(start) + ' ~ ' + datetime_to_date_str(end),
+                left: '11%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
             },
             tooltip: {
@@ -323,12 +323,20 @@ $(document).ready(function () {
                 type: 'heatmap',
                 coordinateSystem: 'calendar',
                 calendarIndex: 0,
-                data: commmits
+                data: commits
             }]
 
         };
 
         myChart.setOption(option);
+    };
+
+    var get_total_commit_count = function (commits) {
+        var commits_total_count = 0;
+        $.each(commits, function (i, v) {
+            commits_total_count += v[1];
+        });
+        return commits_total_count;
     };
 
     const github_returned_max_stars = 39999;
