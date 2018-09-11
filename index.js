@@ -270,7 +270,7 @@ $(document).ready(function () {
             backgroundColor: 'rgba(0,0,0,0.0)',
             title: {
                 text: 'Repository Commits (' + datetime_to_date_str(start) + ' ~ ' + datetime_to_date_str(end) + ')',
-                left: '8%',  // 不要用right，否则副标题不显示
+                left: '10%',  // 不要用right，否则副标题不显示
                 top: '1%'  // 不要用bottom，否则副标题不显示
             },
             tooltip: {
