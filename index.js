@@ -298,6 +298,7 @@ $(document).ready(function () {
             calendar: [
                 {
                     range: [start, end],
+                    left: 'center',
                     cellSize: [15, 15],
                     splitLine: {
                         show: false
