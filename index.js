@@ -111,6 +111,7 @@ $(document).ready(function () {
             grid: {},
             xAxis: {
                 type: 'time',
+                minInterval: mill_sec_one_day,
                 axisLine: {onZero: false},
                 axisLabel: {
                     interval: 0,
@@ -330,6 +331,8 @@ $(document).ready(function () {
     };
 
     const github_returned_max_stars = 39999;
+    const mill_sec_one_day = 24 * 3600 * 1000;
+
 
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
@@ -439,7 +442,6 @@ $(document).ready(function () {
     };
 
     var render_commit_chart = function (q, access_token) {
-        var mill_sec_one_day = 24 * 3600 * 1000;
         var now = new Date();
         var today = datetime_to_date(now);
 
