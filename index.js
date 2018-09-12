@@ -64,6 +64,17 @@ $(document).ready(function () {
         return Math.floor(start + (end - start) * Math.random());
     };
 
+    var select_token = function () {
+        const access_tokens = [
+            '4c61c7e58785bb8b2789224381b2e1331083ffa7',
+            'a95aaa5a06cf5aa871ccc2f670371cfcb556cbd8',
+            '46dcf5dead1cb95385eab0ebab674e3dd3601dcc',
+            '6226fb196321a8a1b685b735e7208b909e12ef48',
+            '76183e52d0b0b1e9265088be5197df9f1a14454e'];
+
+        return access_tokens[random_int(0, access_tokens.length)];
+    };
+
     $.ajaxSetup({
         error: function (xhr, status, error) {
             if (xhr.status === 403) {
@@ -346,26 +357,14 @@ $(document).ready(function () {
     const github_returned_max_stars = 39999;
     const mill_sec_one_day = 24 * 3600 * 1000;
 
-
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
 
-    var select_token = function () {
-        const access_tokens = [
-            '4c61c7e58785bb8b2789224381b2e1331083ffa7',
-            'a95aaa5a06cf5aa871ccc2f670371cfcb556cbd8',
-            '46dcf5dead1cb95385eab0ebab674e3dd3601dcc',
-            '6226fb196321a8a1b685b735e7208b909e12ef48',
-            '76183e52d0b0b1e9265088be5197df9f1a14454e'];
-
-        return access_tokens[random_int(0, access_tokens.length)];
-    };
-
-    var render_stargazers = function (q, access_token) {
+    var render_stargazers = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
         var search_url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
-            + '&access_token=' + access_token;
+            + '&access_token=' + select_token();
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['items'][0]['stargazers_count'];
@@ -382,12 +381,12 @@ $(document).ready(function () {
             } else {
                 while (page <= page_count) {
                     var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
-                        + '&access_token=' + access_token;
+                        + '&access_token=' + select_token();
 
                     (function (page) {
                         invoke_github_api(url, function (stargazers_data) {
                             var stargazers_per_page = stargazers_data.map(function (e, i) {
-                                return [e.starred_at, i + 1 + (page - 1) * 100]
+                                return [e.starred_at, i + 1 + (page - 1) * 100];
                             });
 
                             stargazers = stargazers.concat(stargazers_per_page);
@@ -400,7 +399,7 @@ $(document).ready(function () {
                                     return s1[1] - s2[1];
                                 });
                                 if (stargazers_count > github_returned_max_stars) {
-                                    stargazers.push([new Date().toISOString(), stargazers_count])
+                                    stargazers.push([new Date().toISOString(), stargazers_count]);
                                 }
                                 display_star_chart(q, description, stargazers);
                             }
@@ -413,9 +412,9 @@ $(document).ready(function () {
     };
 
 
-    var render_follower_following_chart = function (q, access_token) {
+    var render_follower_following_chart = function (q) {
         var user = q.split('/')[0];
-        var url = 'https://api.github.com/users/' + user + '?access_token=' + access_token;
+        var url = 'https://api.github.com/users/' + user + '?access_token=' + select_token();
 
         invoke_github_api(url, function (relation_data) {
             var follower_count = relation_data['followers'];
@@ -424,11 +423,11 @@ $(document).ready(function () {
         });
     };
 
-    var render_star_watch_fork_chart = function (q, access_token) {
+    var render_star_watch_fork_chart = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
         var search_url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
-            + '&access_token=' + access_token;
+            + '&access_token=' + select_token();
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['items'][0]['stargazers_count'];
@@ -438,7 +437,7 @@ $(document).ready(function () {
             var page = 1;
             var page_size = 100;
             var watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
-                + '&access_token=' + access_token;
+                + '&access_token=' + select_token();
 
             invoke_github_api(watch_url, function (watch_data, xhr) {
 
@@ -450,7 +449,7 @@ $(document).ready(function () {
 
                 } else {
                     watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + last_page
-                        + '&access_token=' + access_token;
+                        + '&access_token=' + select_token();
 
                     invoke_github_api(watch_url, function (watch_data) {
                         watches_count = (last_page - 1) * page_size + watch_data.length;
@@ -463,11 +462,11 @@ $(document).ready(function () {
 
     };
 
-    var render_commit_chart = function (q, access_token) {
+    var render_commit_chart = function (q) {
         var now = new Date();
         var today = datetime_to_date(now);
 
-        var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity' + '?access_token=' + access_token;
+        var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity' + '?access_token=' + select_token();
 
         var do_render_commit_chart = function (commit_data) {
             var week = now.getDay();
@@ -489,11 +488,11 @@ $(document).ready(function () {
                     if ($.isEmptyObject(commit_data_2)) {
                         invoke_github_api(url, function (commit_data_3) {
                             if ($.isEmptyObject(commit_data_1)) {
-                                alert('Fail to get commit data after 3 tries')
+                                alert('Fail to get commit data after 3 tries');
                             } else {
                                 do_render_commit_chart(commit_data_3);
                             }
-                        })
+                        });
                     } else {
                         do_render_commit_chart(commit_data_2);
                     }
@@ -505,8 +504,8 @@ $(document).ready(function () {
     };
 
     //        var stargazers = [1, 2];
-    render_stargazers(q, select_token());
-    render_star_watch_fork_chart(q, select_token());
-    render_follower_following_chart(q, select_token());
-    render_commit_chart(q, select_token())
+    render_stargazers(q);
+    render_star_watch_fork_chart(q);
+    render_follower_following_chart(q);
+    render_commit_chart(q);
 });
