@@ -172,8 +172,9 @@ $(document).ready(function () {
                 {
                     id: 'a',
                     type: 'line',
-                    // smooth: 1,
+                    // smooth: 0.3,
                     symbolSize: 0,
+                    sampling: 'average',
                     data: data,
                     markPoint: {
                         silent: true,
