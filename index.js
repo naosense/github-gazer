@@ -172,7 +172,6 @@ $(document).ready(function () {
                 {
                     id: 'a',
                     type: 'line',
-                    smooth: 0.2,
                     symbolSize: 0,
                     data: data,
                     markPoint: {
