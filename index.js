@@ -379,6 +379,7 @@ $(document).ready(function () {
             if (page_count === 0) {
                 display_star_chart(q, description, stargazers);
             } else {
+                var load_page_count = 0;
                 while (page <= page_count) {
                     var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
                         + '&access_token=' + select_token();
@@ -390,11 +391,11 @@ $(document).ready(function () {
                             });
 
                             stargazers = stargazers.concat(stargazers_per_page);
+                            load_page_count++;
 
-                            var progress = stargazers.length / return_stargazers_count * 100;
+                            var progress = load_page_count / page_count * 100;
                             $('#progress-bar').css('width', progress + '%');
                             if (progress >= 100) {
-                                $('#progress-bar').css('background-color', '#000');
                                 stargazers.sort(function (s1, s2) {
                                     return s1[1] - s2[1];
                                 });
@@ -402,9 +403,11 @@ $(document).ready(function () {
                                     stargazers.push([new Date().toISOString(), stargazers_count]);
                                 }
                                 display_star_chart(q, description, stargazers);
+                                $('#progress-bar').css('background-color', '#000');
                             }
                         });
                     })(page);
+
                     page++;
                 }
             }
