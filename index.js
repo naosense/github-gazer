@@ -137,7 +137,8 @@ $(document).ready(function () {
             },
             yAxis: {
                 type: 'value',
-                axisLine: {onZero: false}
+                axisLine: {onZero: false},
+                min: 'dataMin'
             },
             visualMap: {
                 show: false,
@@ -156,8 +157,9 @@ $(document).ready(function () {
             dataZoom: [
                 {
                     type: 'slider',
+                    realtime: false,
                     xAxisIndex: 0,
-                    filterMode: 'empty',
+                    filterMode: 'filter',
                     labelFormatter: function (value) {
                         return echarts.format.formatTime('yyyy-MM-dd', value);
                     }
@@ -165,7 +167,7 @@ $(document).ready(function () {
                 {
                     type: 'inside',
                     xAxisIndex: 0,
-                    filterMode: 'empty'
+                    filterMode: 'filter'
                 }
             ],
             series: [
