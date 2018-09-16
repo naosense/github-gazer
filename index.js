@@ -32,6 +32,13 @@ $(document).ready(function () {
         return new Date(year + '-' + month + '-' + day + ' 00:00:00');
     };
 
+    var datetime_to_utc_date = function (datetime) {
+        var year = datetime.getUTCFullYear();
+        var month = left_padding_zero((datetime.getUTCMonth() + 1));
+        var day = left_padding_zero(datetime.getUTCDate());
+        return new Date(year + '-' + month + '-' + day + 'T00:00:00Z');
+    };
+
     var datetime_to_date_str = function (datetime) {
         var year = datetime.getFullYear();
         var month = left_padding_zero((datetime.getMonth() + 1));
@@ -468,12 +475,12 @@ $(document).ready(function () {
 
     var render_commit_chart = function (q) {
         var now = new Date();
-        var today = datetime_to_date(now);
+        var today = datetime_to_utc_date(now);
 
         var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity' + '?access_token=' + select_token();
 
         var do_render_commit_chart = function (commit_data) {
-            var week = now.getDay();
+            var week = now.getUTCDay();
             var days = 51 * 7 + week + 1;
             var one_year_ago = new Date(today.getTime() - (days - 1) * mill_sec_one_day);
 
