@@ -114,7 +114,9 @@ $(document).ready(function () {
         var option = {
             backgroundColor: 'rgba(0,0,0,0.0)',
             tooltip : {
-                position: 'inside',
+                position: function (point, params, dom, rect, size) {
+                    return [point[0] + 15, point[1]];
+                },
                 formatter: function (params) {
                     return params['marker'] + ' ' + params['value'] + ' issues or pull requests' + ' ' + params['seriesName'];
 
