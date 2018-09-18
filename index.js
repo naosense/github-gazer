@@ -114,7 +114,7 @@ $(document).ready(function () {
         var option = {
             backgroundColor: 'rgba(0,0,0,0.0)',
             tooltip : {
-                position: 'left',
+                position: 'inside',
                 formatter: function (params) {
                     return params['marker'] + ' ' + params['value'] + ' issues or pull requests' + ' ' + params['seriesName'];
 
