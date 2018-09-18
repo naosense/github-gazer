@@ -108,6 +108,47 @@ $(document).ready(function () {
         });
     };
 
+    var display_issue_chart = function (q, open_issue_count, closed_issue_count) {
+        var myChart = echarts.init(document.getElementById('issue-chart'), 'dark');
+
+        var option = {
+            backgroundColor: 'rgba(0,0,0,0.0)',
+            tooltip : {
+                position: 'left',
+                formatter: function (params) {
+                    return params['marker'] + ' ' + params['value'] + ' issues or pull requests' + ' ' + params['seriesName'];
+
+                }
+            },
+            xAxis:  {
+                type: 'value',
+                max: open_issue_count + closed_issue_count,
+                show: false
+            },
+            yAxis: {
+                type: 'category',
+                data: ['Issues & Pull Requests'],
+                show: false
+            },
+            color: ['#ea6677', '#28a745'],
+            series: [
+                {
+                    name: 'unsolved',
+                    type: 'bar',
+                    stack: 'Total',
+                    data: [open_issue_count]
+                },
+                {
+                    name: 'solved',
+                    type: 'bar',
+                    stack: 'Total',
+                    data: [closed_issue_count]
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+    };
 
     var display_star_chart = function (q, description, data) {
         var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
@@ -167,6 +208,11 @@ $(document).ready(function () {
                     realtime: false,
                     xAxisIndex: 0,
                     filterMode: 'filter',
+                    dataBackground: {
+                        areaStyle: {
+                            color: 'rgba(255,255,255,0.5)'
+                        }
+                    },
                     labelFormatter: function (value) {
                         return echarts.format.formatTime('yyyy-MM-dd', value);
                     }
@@ -368,6 +414,57 @@ $(document).ready(function () {
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
 
+    var render_issue_chart = function (q) {
+        var page_size = 100;
+        var all_issue_count = 0;
+        var open_issue_count = 0;
+
+        var all_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=all&per_page=' + page_size
+            + '&access_token=' + select_token();
+
+        invoke_github_api(all_issue_url, function (issue_data, xhr) {
+            var last_page = parse_last_page(xhr.getResponseHeader('Link'));
+
+            if (last_page === 1) {
+                all_issue_count = issue_data.length;
+                var open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page=' + page_size
+                    + '&access_token=' + select_token();
+                invoke_github_api(open_issue_url, function (issue_data) {
+                    open_issue_count = issue_data.length;
+                    display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
+                });
+
+            } else {
+                all_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=all&per_page='
+                    + page_size + '&page=' + last_page + '&access_token=' + select_token();
+
+                invoke_github_api(all_issue_url, function (issue_data) {
+                    all_issue_count = (last_page - 1) * page_size + issue_data.length;
+
+                    var open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page='
+                        + page_size + '&access_token=' + select_token();
+                    invoke_github_api(open_issue_url, function (issue_data, xhr) {
+                        var last_page = parse_last_page(xhr.getResponseHeader('Link'));
+
+                        if (last_page === 1) {
+                            open_issue_count = issue_data.length;
+                            display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
+                        } else {
+                            open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page='
+                                + page_size + '&page=' + last_page + '&access_token=' + select_token();
+                            invoke_github_api(open_issue_url, function (issue_data) {
+                                open_issue_count = (last_page - 1) * page_size + issue_data.length;
+                                display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
+
+                            })
+                        }
+                    });
+                });
+            }
+        });
+
+    };
+
     var render_stargazers = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
@@ -515,6 +612,7 @@ $(document).ready(function () {
     };
 
     //        var stargazers = [1, 2];
+    render_issue_chart(q);
     render_stargazers(q);
     render_star_watch_fork_chart(q);
     render_follower_following_chart(q);
