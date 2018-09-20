@@ -556,23 +556,23 @@ $(document).ready(function () {
             display_commit_chart(q, one_year_ago, today, commits);
         };
 
-        invoke_github_api(url, function (commit_data_1) {
-            if ($.isEmptyObject(commit_data_1)) {
-                invoke_github_api(url, function (commit_data_2) {
-                    if ($.isEmptyObject(commit_data_2)) {
-                        invoke_github_api(url, function (commit_data_3) {
-                            if ($.isEmptyObject(commit_data_1)) {
+        invoke_github_api(url, function (commit_data) {
+            if ($.isEmptyObject(commit_data)) {
+                invoke_github_api(url, function (commit_data) {
+                    if ($.isEmptyObject(commit_data)) {
+                        invoke_github_api(url, function (commit_data) {
+                            if ($.isEmptyObject(commit_data)) {
                                 alert('Fail to get commit data after 3 tries');
                             } else {
-                                do_render_commit_chart(commit_data_3);
+                                do_render_commit_chart(commit_data);
                             }
                         });
                     } else {
-                        do_render_commit_chart(commit_data_2);
+                        do_render_commit_chart(commit_data);
                     }
                 });
             } else {
-                do_render_commit_chart(commit_data_1);
+                do_render_commit_chart(commit_data);
             }
         });
     };
