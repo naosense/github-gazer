@@ -8,11 +8,11 @@ $(document).ready(function () {
         query_string = query_string.charAt(0) === '?' ? query_string.substring(1) : query_string;
         console.log(query_string);
         var query_array = query_string.split('&');
-        for (var i in query_array) {
-            var kv = query_array[i].split('=');
+        query_array.forEach(function (q) {
+            var kv = q.split('=');
             console.log(kv);
             query[kv[0]] = kv[1];
-        }
+        });
         return query;
 
     };
@@ -56,13 +56,12 @@ $(document).ready(function () {
         }
 
         var lks = link_header.split(',');
-
-        for (var i in lks) {
-            var url_rel = lks[i].split(';');
+        lks.forEach(function (lk) {
+            var url_rel = lk.split(';');
             if (url_rel[1].indexOf('last') > -1) {
                 return parseInt(parse_query(url_rel[0].substring(url_rel[0].indexOf('?'), url_rel[0].length - 1))['page']);
             }
-        }
+        });
 
         return 1;
     };
@@ -118,7 +117,7 @@ $(document).ready(function () {
                     return [point[0] + 15, point[1]];
                 },
                 formatter: function (params) {
-                    return params['marker'] + ' ' + params['value'] + ' issues or pull requests' + ' ' + params['seriesName'];
+                    return params['marker'] + ' ' + params['value'] + ' issues' + ' ' + params['seriesName'];
 
                 }
             },
@@ -129,7 +128,7 @@ $(document).ready(function () {
             },
             yAxis: {
                 type: 'category',
-                data: ['Issues & Pull Requests'],
+                data: ['Issues'],
                 show: false
             },
             color: ['#ea6677', '#28a745'],
@@ -241,7 +240,6 @@ $(document).ready(function () {
                 }
             ]
         };
-
 
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
@@ -404,8 +402,8 @@ $(document).ready(function () {
 
     var get_total_commit_count = function (commits) {
         var commits_total_count = 0;
-        $.each(commits, function (i, v) {
-            commits_total_count += v[1];
+        commits.forEach(function (c) {
+            commits_total_count += c[1];
         });
         return commits_total_count;
     };
@@ -417,54 +415,21 @@ $(document).ready(function () {
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
 
     var render_issue_chart = function (q) {
-        var page_size = 100;
-        var all_issue_count = 0;
-        var open_issue_count = 0;
 
-        var all_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=all&per_page=' + page_size
+        var open_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:open+repo:' + q
             + '&access_token=' + select_token();
 
-        invoke_github_api(all_issue_url, function (issue_data, xhr) {
-            var last_page = parse_last_page(xhr.getResponseHeader('Link'));
+        invoke_github_api(open_issue_url, function (issue_data) {
+            var open_issue_count = issue_data['total_count'];
 
-            if (last_page === 1) {
-                all_issue_count = issue_data.length;
-                var open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page=' + page_size
-                    + '&access_token=' + select_token();
-                invoke_github_api(open_issue_url, function (issue_data) {
-                    open_issue_count = issue_data.length;
-                    display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
-                });
+            var closed_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:closed+repo:' + q
+                + '&access_token=' + select_token();
 
-            } else {
-                all_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=all&per_page='
-                    + page_size + '&page=' + last_page + '&access_token=' + select_token();
-
-                invoke_github_api(all_issue_url, function (issue_data) {
-                    all_issue_count = (last_page - 1) * page_size + issue_data.length;
-
-                    var open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page='
-                        + page_size + '&access_token=' + select_token();
-                    invoke_github_api(open_issue_url, function (issue_data, xhr) {
-                        var last_page = parse_last_page(xhr.getResponseHeader('Link'));
-
-                        if (last_page === 1) {
-                            open_issue_count = issue_data.length;
-                            display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
-                        } else {
-                            open_issue_url = 'https://api.github.com/repos/' + q + '/issues?filter=all&state=open&per_page='
-                                + page_size + '&page=' + last_page + '&access_token=' + select_token();
-                            invoke_github_api(open_issue_url, function (issue_data) {
-                                open_issue_count = (last_page - 1) * page_size + issue_data.length;
-                                display_issue_chart(q, open_issue_count, all_issue_count - open_issue_count);
-
-                            })
-                        }
-                    });
-                });
-            }
+            invoke_github_api(closed_issue_url, function (issue_data) {
+                var closed_issue_count = issue_data['total_count'];
+                display_issue_chart(q, open_issue_count, closed_issue_count)
+            })
         });
-
     };
 
     var render_stargazers = function (q) {
@@ -520,7 +485,6 @@ $(document).ready(function () {
             }
         });
     };
-
 
     var render_follower_following_chart = function (q) {
         var user = q.split('/')[0];
@@ -613,7 +577,7 @@ $(document).ready(function () {
         });
     };
 
-    //        var stargazers = [1, 2];
+    // var stargazers = [1, 2];
     render_issue_chart(q);
     render_stargazers(q);
     render_star_watch_fork_chart(q);
