@@ -107,11 +107,18 @@ $(document).ready(function () {
         });
     };
 
-    var display_issue_chart = function (q, open_issue_count, closed_issue_count) {
+    var display_issue_chart = function (q, description, open_issue_count, closed_issue_count) {
         var myChart = echarts.init(document.getElementById('issue-chart'), 'dark');
 
         var option = {
             backgroundColor: 'rgba(0,0,0,0.0)',
+            title: {
+                text: 'Stargazers Trend',
+                subtext: q + (is_empty(description) ? '' : ': ' + description),
+                sublink: 'https://github.com/' + q,
+                left: '11%',  // 不要用right，否则副标题不显示
+                top: '1%'  // 不要用bottom，否则副标题不显示
+            },
             tooltip : {
                 position: function (point, params, dom, rect, size) {
                     return [point[0] + 15, point[1]];
@@ -120,6 +127,10 @@ $(document).ready(function () {
                     return params['marker'] + ' ' + params['value'] + ' issues' + ' ' + params['seriesName'];
 
                 }
+            },
+            grid: {
+                top: 65,
+                bottom: 0
             },
             xAxis:  {
                 type: 'value',
@@ -136,12 +147,14 @@ $(document).ready(function () {
                 {
                     name: 'unsolved',
                     type: 'bar',
+                    barWidth: 5,
                     stack: 'Total',
                     data: [open_issue_count]
                 },
                 {
                     name: 'solved',
                     type: 'bar',
+                    barWidth: 5,
                     stack: 'Total',
                     data: [closed_issue_count]
                 }
@@ -151,19 +164,11 @@ $(document).ready(function () {
         myChart.setOption(option);
     };
 
-    var display_star_chart = function (q, description, data) {
+    var display_star_chart = function (q, data) {
         var myChart = echarts.init(document.getElementById('star-chart'), 'dark');
 
         var option = {
             backgroundColor: 'rgba(0,0,0,0.0)',
-
-            title: {
-                text: 'Stargazers Trend',
-                subtext: q + (is_empty(description) ? '' : ': ' + description),
-                sublink: 'https://github.com/' + q,
-                left: '11%',  // 不要用right，否则副标题不显示
-                top: '1%'  // 不要用bottom，否则副标题不显示
-            },
             tooltip: {
                 trigger: 'axis',
                 formatter: function (params) {
@@ -172,7 +177,6 @@ $(document).ready(function () {
                         + echarts.format.formatTime('yyyy-MM-dd', params[0]['axisValue']);
                 }
             },
-            grid: {},
             xAxis: {
                 type: 'time',
                 minInterval: mill_sec_one_day,
@@ -415,20 +419,25 @@ $(document).ready(function () {
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
 
     var render_issue_chart = function (q) {
+        var repo_url = 'https://api.github.com/repos/' + q
+            + '?access_token=' + select_token();
+        invoke_github_api(repo_url, function (repo_data) {
+            var description = repo_data['description'];
 
-        var open_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:open+repo:' + q
-            + '&access_token=' + select_token();
-
-        invoke_github_api(open_issue_url, function (issue_data) {
-            var open_issue_count = issue_data['total_count'];
-
-            var closed_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:closed+repo:' + q
+            var open_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:open+repo:' + q
                 + '&access_token=' + select_token();
 
-            invoke_github_api(closed_issue_url, function (issue_data) {
-                var closed_issue_count = issue_data['total_count'];
-                display_issue_chart(q, open_issue_count, closed_issue_count)
-            })
+            invoke_github_api(open_issue_url, function (issue_data) {
+                var open_issue_count = issue_data['total_count'];
+
+                var closed_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:closed+repo:' + q
+                    + '&access_token=' + select_token();
+
+                invoke_github_api(closed_issue_url, function (issue_data) {
+                    var closed_issue_count = issue_data['total_count'];
+                    display_issue_chart(q, description, open_issue_count, closed_issue_count)
+                })
+            });
         });
     };
 
@@ -440,7 +449,6 @@ $(document).ready(function () {
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['items'][0]['stargazers_count'];
-            var description = search_data['items'][0]['description'];
             var stargazers = [];
             var page = 1;
             var page_size = 100;
@@ -449,7 +457,7 @@ $(document).ready(function () {
             var page_count = Math.ceil(return_stargazers_count / page_size);
 
             if (page_count === 0) {
-                display_star_chart(q, description, stargazers);
+                display_star_chart(q, stargazers);
             } else {
                 var load_page_count = 0;
                 while (page <= page_count) {
@@ -474,7 +482,7 @@ $(document).ready(function () {
                                 if (stargazers_count > github_returned_max_stars) {
                                     stargazers.push([new Date().toISOString(), stargazers_count]);
                                 }
-                                display_star_chart(q, description, stargazers);
+                                display_star_chart(q, stargazers);
                                 $('#progress-bar').css('background-color', '#000');
                             }
                         });
