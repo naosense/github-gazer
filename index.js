@@ -180,17 +180,43 @@ $(document).ready(function () {
             xAxis: {
                 type: 'time',
                 minInterval: mill_sec_one_day,
-                axisLine: {onZero: false},
+                axisLine: {
+                    onZero: false,
+                    lineStyle: {
+                        width: 3
+                    }
+                },
+                axisTick: {
+                    lineStyle: {
+                        width: 2
+                    }
+                },
                 axisLabel: {
                     interval: 0,
                     formatter: function (value, index) {
                         return echarts.format.formatTime('yyyy-MM-dd', value);
                     }
+                },
+                splitLine: {
+                    show: false
                 }
             },
             yAxis: {
                 type: 'value',
-                axisLine: {onZero: false},
+                axisLine: {
+                    show: false,
+                    onZero: false
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#434343',
+                        type: 'solid',
+                        width: 2
+                    }
+                },
                 min: 'dataMin'
             },
             visualMap: {
@@ -232,7 +258,8 @@ $(document).ready(function () {
                 {
                     id: 'a',
                     type: 'line',
-                    symbolSize: 0,
+                    showSymbol: false,
+                    smooth: true,
                     data: data,
                     markPoint: {
                         silent: true,
