@@ -408,10 +408,10 @@ $(document).ready(function () {
                         borderColor: '#000'
                     },
                     dayLabel: {
-                        color: '#eeeeee'
+                        show: false
                     },
                     monthLabel: {
-                        color: '#eeeeee'
+                        color: '#fff'
                     },
                     yearLabel: {
                         show: false
