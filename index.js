@@ -124,7 +124,7 @@ $(document).ready(function () {
                     return [point[0] + 15, point[1]];
                 },
                 formatter: function (params) {
-                    return params['marker'] + ' ' + params['value'] + ' issues' + ' ' + params['seriesName'];
+                    return params['marker'] + ' ' + params['value'] + ' issue(s)' + ' ' + params['seriesName'];
 
                 }
             },
@@ -142,17 +142,17 @@ $(document).ready(function () {
                 data: ['Issues'],
                 show: false
             },
-            color: ['#ea6677', '#28a745'],
+            color: ['#28a745', '#ea6677'],
             series: [
                 {
-                    name: 'unsolved',
+                    name: 'open',
                     type: 'bar',
                     barWidth: 5,
                     stack: 'Total',
                     data: [open_issue_count]
                 },
                 {
-                    name: 'solved',
+                    name: 'closed',
                     type: 'bar',
                     barWidth: 5,
                     stack: 'Total',
@@ -353,7 +353,7 @@ $(document).ready(function () {
                         }
                     },
                     data: [
-                        {value: follower_count, name: 'Follower'},
+                        {value: follower_count, name: 'Followers'},
                         {value: following_count, name: 'Following'}
                     ]
                 }
@@ -535,40 +535,14 @@ $(document).ready(function () {
     var render_star_watch_fork_chart = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
-        var search_url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
-            + '&access_token=' + select_token();
+        var search_url = 'https://api.github.com/repos/' + user + '/' + repo + '?access_token=' + select_token();
 
         invoke_github_api(search_url, function (search_data) {
-            var stargazers_count = search_data['items'][0]['stargazers_count'];
-            var forks_count = search_data['items'][0]['forks_count'];
-
-            var watches_count = 0;
-            var page = 1;
-            var page_size = 100;
-            var watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + page
-                + '&access_token=' + select_token();
-
-            invoke_github_api(watch_url, function (watch_data, xhr) {
-
-                var last_page = parse_last_page(xhr.getResponseHeader('Link'));
-
-                if (last_page === 1) {
-                    watches_count += watch_data.length;
-                    display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
-
-                } else {
-                    watch_url = 'https://api.github.com/repos/' + q + '/subscribers?per_page=' + page_size + '&page=' + last_page
-                        + '&access_token=' + select_token();
-
-                    invoke_github_api(watch_url, function (watch_data) {
-                        watches_count = (last_page - 1) * page_size + watch_data.length;
-                        display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
-                    });
-                }
-            });
-
+            var stargazers_count = search_data['stargazers_count'];
+            var forks_count = search_data['forks'];
+            var watches_count = search_data['subscribers_count'];
+            display_star_watch_fork_chart(q, stargazers_count, watches_count, forks_count);
         });
-
     };
 
     var render_commit_chart = function (q) {
