@@ -142,17 +142,17 @@ $(document).ready(function () {
                 data: ['Issues'],
                 show: false
             },
-            color: ['#28a745', '#ea6677'],
+            color: ['#ea6677', '#28a745'],
             series: [
                 {
-                    name: 'open',
+                    name: 'unsolved',
                     type: 'bar',
                     barWidth: 5,
                     stack: 'Total',
                     data: [open_issue_count]
                 },
                 {
-                    name: 'closed',
+                    name: 'solved',
                     type: 'bar',
                     barWidth: 5,
                     stack: 'Total',
