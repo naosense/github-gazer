@@ -283,6 +283,7 @@ $(document).ready(function () {
             tooltip: {},
             radar: {
                 shape: 'circle',
+                radius: '70%',
                 indicator: [
                     {name: 'Star', max: Math.max(stars_count, watches_count, forks_count)},
                     {name: 'Watch', max: Math.max(stars_count, watches_count, forks_count)},
