@@ -95,7 +95,8 @@ $(document).ready(function () {
     var invoke_github_api = function (url, callback) {
         $.ajax({
             headers: {
-                Accept: 'application/vnd.github.v3.star+json; charset=utf-8'
+                Accept: 'application/vnd.github.v3.star+json; charset=utf-8',
+                Authorization: 'token ' + select_token()
             },
             url: url,
             dataType: 'json',
@@ -447,19 +448,16 @@ $(document).ready(function () {
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
 
     var render_issue_chart = function (q) {
-        var repo_url = 'https://api.github.com/repos/' + q
-            + '?access_token=' + select_token();
+        var repo_url = 'https://api.github.com/repos/' + q;
         invoke_github_api(repo_url, function (repo_data) {
             var description = repo_data['description'];
 
-            var open_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:open+repo:' + q
-                + '&access_token=' + select_token();
+            var open_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:open+repo:' + q;
 
             invoke_github_api(open_issue_url, function (issue_data) {
                 var open_issue_count = issue_data['total_count'];
 
-                var closed_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:closed+repo:' + q
-                    + '&access_token=' + select_token();
+                var closed_issue_url = 'https://api.github.com/search/issues?q=type:issue+state:closed+repo:' + q;
 
                 invoke_github_api(closed_issue_url, function (issue_data) {
                     var closed_issue_count = issue_data['total_count'];
@@ -472,8 +470,7 @@ $(document).ready(function () {
     var render_stargazers = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
-        var search_url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo
-            + '&access_token=' + select_token();
+        var search_url = 'https://api.github.com/search/repositories?q=user:' + user + '+repo:' + repo + '+' + repo;
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['items'][0]['stargazers_count'];
@@ -489,8 +486,7 @@ $(document).ready(function () {
             } else {
                 var load_page_count = 0;
                 while (page <= page_count) {
-                    var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page
-                        + '&access_token=' + select_token();
+                    var url = 'https://api.github.com/repos/' + q + '/stargazers?per_page=' + page_size + '&page=' + page;
 
                     (function (page) {
                         invoke_github_api(url, function (stargazers_data) {
@@ -524,7 +520,7 @@ $(document).ready(function () {
 
     var render_follower_following_chart = function (q) {
         var user = q.split('/')[0];
-        var url = 'https://api.github.com/users/' + user + '?access_token=' + select_token();
+        var url = 'https://api.github.com/users/' + user;
 
         invoke_github_api(url, function (relation_data) {
             var follower_count = relation_data['followers'];
@@ -536,7 +532,7 @@ $(document).ready(function () {
     var render_star_watch_fork_chart = function (q) {
         var user = q.split('/')[0];
         var repo = q.split('/')[1];
-        var search_url = 'https://api.github.com/repos/' + user + '/' + repo + '?access_token=' + select_token();
+        var search_url = 'https://api.github.com/repos/' + user + '/' + repo;
 
         invoke_github_api(search_url, function (search_data) {
             var stargazers_count = search_data['stargazers_count'];
@@ -550,7 +546,7 @@ $(document).ready(function () {
         var now = new Date();
         var today = datetime_to_utc_date(now);
 
-        var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity' + '?access_token=' + select_token();
+        var url = 'https://api.github.com/repos/' + q + '/stats/commit_activity';
 
         var do_render_commit_chart = function (commit_data) {
             var week = now.getUTCDay();
