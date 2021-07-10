@@ -71,10 +71,11 @@ $(document).ready(function () {
     };
 
     var select_token = function () {
-        if (!is_empty(query['token'])) {
-            return query['token'];
+        if (is_empty(query['token'])) {
+            alert("Please specify a token in url like this: https://pingao777.github.io/github-gazer/?q=user/repo&token=your-own-token");
+            return '';
         }
-        return "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";
+        return query['token'];
     };
 
     $.ajaxSetup({
@@ -442,6 +443,9 @@ $(document).ready(function () {
 
     var query = parse_query(window.location.search);
     var q = is_empty(query['q']) ? 'pingao777/markdown-preview-sync' : query['q'];
+    if (is_empty(select_token())) {
+        return;
+    }
 
     var render_issue_chart = function (q) {
         var repo_url = 'https://api.github.com/repos/' + q;
