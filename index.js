@@ -74,7 +74,7 @@ $(document).ready(function () {
         if (!is_empty(query['token'])) {
             return query['token'];
         }
-        return "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";
+        return "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";
     };
 
     $.ajaxSetup({
